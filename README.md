@@ -70,3 +70,14 @@ much load, instead of generating Markov chain output. At present,
 Spigot is supplying around 4 Million pages per day. With the zip
 bomb inserted, that's clocking in at around 15 TBytes per day. Actual
 data supplied is under 70 GBytes per day.
+
+# Portability
+
+I should note that, because of the incremental way in which gzipped
+streams is built by the library, gzipchunk needs to be able to access
+zlib's "crc32_combine" function. This isn't exposed by the Python
+library, so gzipchunk currently uses the "ctypes" module to load the
+zlib shared library and call the function. This has been tested on
+Debian Linux only. I suspect it will work on other Linux systems, 
+but it will almost certainly need changes to get it working on Windows
+and macOS.
