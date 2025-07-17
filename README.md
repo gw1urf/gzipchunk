@@ -73,8 +73,8 @@ data supplied is under 70 GBytes per day.
 
 # Portability
 
-I should note that, because of the incremental way in which gzipped
-streams is built by the library, gzipchunk needs to be able to access
+I should note that, because of the incremental way in which the gzipped
+stream is built by the library, gzipchunk needs to be able to access
 zlib's "crc32_combine" function. This isn't exposed by the Python
 library, so gzipchunk currently uses the "ctypes" module to load the
 zlib shared library and call the function. This has been tested on
