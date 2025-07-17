@@ -41,7 +41,7 @@ Basically, you create a GzipChunk object and call its "add()" method
 with a "data" argument (possibly with a repeat count). If the "data" 
 argument is a bytes object or a string, it gets added to the compression
 stream, compressing on the fly. If it's another "GzipChunk" object, then
-that the current object's stream gets a "reset" added, then the add()
+the current object's stream gets a "reset" added, then the add()
 object's compressed data gets added.
 
 So you could do something like:
@@ -56,7 +56,7 @@ So you could do something like:
      response.add(some_more_html)
      transmit_compressed_page(response.output())
 
-```transmit_compressed_page``` will be a valid gzipped stream, with 
+```transmit_compressed_page``` will be handed a valid gzipped stream, with 
 30MBytes of zip bomb, but that 30MBytes will only have to be compressed
 once on startup.
 
