@@ -3,6 +3,14 @@ import zlib
 import ctypes
 import ctypes.util
 
+# This seems to be the only way of getting to zlib's
+# crc32_combine function. N.B. I know this works on
+# Debian Linux. It probably works on other Linux
+# distros. Windows & MacOS? No idea.
+ctypes_zlib = ctypes.CDLL(ctypes.util.find_library('z'))
+ctypes_zlib.crc32_combine.argtypes = [ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+ctypes_zlib.crc32_combine.restype = ctypes.c_ulong
+
 class GzipChunk:
     """
     This class allows you to construct a gzipped object in stages.
@@ -77,14 +85,6 @@ class GzipChunk:
         self.endchunk = zlib.compressobj(wbits=-15).flush(zlib.Z_FINISH)
         self.header = struct.pack("<BBBBLBB", 0x1f, 0x8b, 8, 0, int(timestamp), 2, 255)
 
-        # This seems to be the only way of getting to zlib's 
-        # crc32_combine function. N.B. I know this works on 
-        # Debian Linux. It probably works on other Linux 
-        # distros. Windows & MacOS? No idea.
-        lib = ctypes.util.find_library('z')
-        self.zlib = ctypes.CDLL(lib)
-        self.zlib.crc32_combine.argtypes = [ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
-        self.zlib.crc32_combine.restype = ctypes.c_ulong
 
         # We don't start a zlib compress object here. It gets
         # created in the add() method when needed.
@@ -130,7 +130,7 @@ class GzipChunk:
             for i in range(reps):
                 self.length += data.length
                 self.compressed.append(data.compressed[0])
-                self.crc = self.zlib.crc32_combine(self.crc, data.crc, data.length)
+                self.crc = ctypes_zlib.crc32_combine(self.crc, data.crc, data.length)
         else:
             # Not pre-compressed data. Hopefully a string or a bytes array.
             if isinstance(data, str):
@@ -149,7 +149,7 @@ class GzipChunk:
             # Add however many repetitions were requested.
             for i in range(reps):
                 self.compressed[-1] = self.compressed[-1] + self.compressor.compress(data)
-                self.crc = self.zlib.crc32_combine(self.crc, crc, len(data))
+                self.crc = ctypes_zlib.crc32_combine(self.crc, crc, len(data))
             self.length += reps*len(data)
 
     def output(self):
